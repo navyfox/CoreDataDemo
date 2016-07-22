@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
 
-    var list = [String]()
+    var cars = [NSManagedObject]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,12 +29,14 @@ class ViewController: UIViewController, UITableViewDataSource {
     }
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return list.count
+        return cars.count
     }
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell")
-        cell?.textLabel?.text = list[indexPath.row]
+
+        let car = cars[indexPath.row]
+        cell?.textLabel?.text = car.valueForKey("mark") as? String
 
         return cell!
     }
@@ -42,7 +45,7 @@ class ViewController: UIViewController, UITableViewDataSource {
         let alert = UIAlertController(title: "New Item", message: "Add new item", preferredStyle: .Alert)
         let saveAction = UIAlertAction(title: "save", style: .Default) { (action: UIAlertAction) in
             let textField = alert.textFields?.first
-            self.list.append(textField!.text!)
+            self.saveMark(textField!.text!)
             self.tableView.reloadData()
         }
 
@@ -60,5 +63,20 @@ class ViewController: UIViewController, UITableViewDataSource {
 
     }
 
+    func saveMark(mark: String) {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = appDelegate.managedObjectContext
+        let entity = NSEntityDescription.entityForName("Car", inManagedObjectContext: context)
+        let car = NSManagedObject(entity: entity!, insertIntoManagedObjectContext: context)
+
+        car.setValue(mark, forKey: "mark")
+
+        do {
+            try context.save()
+            cars.append(car)
+        } catch let error as NSError {
+            print("localized error description \(error.localizedDescription)")
+        }
+    }
 }
 
