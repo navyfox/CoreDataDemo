@@ -23,6 +23,21 @@ class ViewController: UIViewController, UITableViewDataSource {
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
 
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context = appDelegate.managedObjectContext
+
+        let fetchRequest = NSFetchRequest(entityName: "Car")
+
+        do {
+            let results = try context.executeFetchRequest(fetchRequest)
+            cars = results as! [NSManagedObject]
+        } catch let error as NSError {
+            print("Запрос данных не прошел: \(error.localizedDescription)")
+        }
+    }
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
