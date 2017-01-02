@@ -15,6 +15,7 @@ class ViewController: UIViewController, UITableViewDataSource {
 
     var cars = [NSManagedObject]()
 
+//срабатывает один раз когда загружается приложение
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -23,15 +24,20 @@ class ViewController: UIViewController, UITableViewDataSource {
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
 
+//срабатывает каждый раз когда происходят изменения в интерфейсе
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+    //доступ к AppDelegate
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    //доступ к Managed Object Context который хранится в качестве ленивого свойстава в AppDelegate
         let context = appDelegate.managedObjectContext
-
+    //делаем запрос к сущности Car
         let fetchRequest = NSFetchRequest(entityName: "Car")
 
         do {
+        //пробуем извлечь значения
             let results = try context.executeFetchRequest(fetchRequest)
+        //если получится запишем в Cars рузультат
             cars = results as! [NSManagedObject]
         } catch let error as NSError {
             print("Запрос данных не прошел: \(error.localizedDescription)")
@@ -77,17 +83,22 @@ class ViewController: UIViewController, UITableViewDataSource {
         presentViewController(alert, animated: true, completion: nil)
 
     }
-
+//сохраняем в Core Data
     func saveMark(mark: String) {
+    //доступ к AppDelegate
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    //доступ к Managed Object Context который хранится в качестве ленивого свойстава в AppDelegate
         let context = appDelegate.managedObjectContext
+    //доступ к сущности Car
         let entity = NSEntityDescription.entityForName("Car", inManagedObjectContext: context)
+    //чтобы сохранить мы должны создать экземпляр NSManagedObject
         let car = NSManagedObject(entity: entity!, insertIntoManagedObjectContext: context)
-
+    //какое значение мы хотим добывить и для какого ключа?
         car.setValue(mark, forKey: "mark")
-
+    //пытаемся сохранить
         do {
             try context.save()
+        //если сохранилось, то добавим машину в массив Cars[NSManagedObject]
             cars.append(car)
         } catch let error as NSError {
             print("localized error description \(error.localizedDescription)")
